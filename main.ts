@@ -28,10 +28,10 @@ const app = new Application();
 
 app.post("/users", async (c) => {
   const userData = await c.body as User;
-  ensureUserValid(userData);
+  const user = ensureUserValid(userData);
   await users.updateOne(
     { 设备ID: userData.设备ID },
-    { $set: userData },
+    { $set: user },
     { upsert: true },
   );
 
@@ -46,7 +46,7 @@ app.get("/users", (_) => {
 
 app.start({ port: 8083 });
 
-function ensureUserValid(user: User) {
+function ensureUserValid(user: User): User {
   const keys = ["姓名", "学号", "设备ID"] as const;
   const { 姓名, 学号, 设备ID } = user;
   user = { 姓名, 学号, 设备ID };
@@ -55,4 +55,6 @@ function ensureUserValid(user: User) {
       throw new InternalServerErrorException(`${i}❌`);
     }
   }
+
+  return user;
 }
