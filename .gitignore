@@ -1,2 +1,2 @@
 .vscode
-.deno_plugins
+.deno_plugins/*dll
