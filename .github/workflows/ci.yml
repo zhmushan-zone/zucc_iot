@@ -1,0 +1,34 @@
+name: ci
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: denolib/setup-deno@master
+        with:
+          deno-version: 1.4.4
+      - name: Build Image
+        env:
+          DockerUsername: ${{ secrets.DockerUsername }}
+          DockerPassword: ${{ secrets.DockerPassword }}
+        run: |
+          docker login -u $DockerUsername -p $DockerPassword
+          docker build -t zhmushan/zucc_iot .
+          docker push zhmushan/zucc_iot
+  deploy:
+    runs-on: ubuntu-latest
+    needs: [publish]
+    steps:
+      - uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.DeployHost }}
+          username: ${{ secrets.DeployUsername }}
+          password: ${{ secrets.DeployPassword }}
+          port: 22
+          script: ${{ secrets.DeployScript }}
